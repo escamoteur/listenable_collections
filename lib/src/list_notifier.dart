@@ -27,7 +27,7 @@ class ListNotifier<T> extends DelegatingList<T>
   ListNotifier(
       {List<T> data, bool dontNotifyIfEqual = false, this.customEquality})
       : _dontNotifyIfEqual = dontNotifyIfEqual,
-        super(data);
+        super(data ?? []);
 
   final bool _dontNotifyIfEqual;
   final bool Function(T x, T y) customEquality;
@@ -120,6 +120,7 @@ class ListNotifier<T> extends DelegatingList<T>
   @override
   void addAll(Iterable<T> iterable) {
     super.addAll(iterable);
+    _notify();
   }
 
   @override

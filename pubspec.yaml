@@ -1,6 +1,6 @@
 name: listenable_collections
 description: A collection of Dart collections that behave like ValueNotifier if their data changes.
-version: 0.0.2
+version: 0.0.3
 author: Thomas Burkhart
 homepage: https://github.com/escamoteur/listenable_collections
 
