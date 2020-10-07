@@ -51,6 +51,7 @@ class ListNotifier<T> extends DelegatingList<T>
   void endTransAction() {
     assert(_inTransaction, 'No active transaction in ListNotifier');
     _inTransaction = false;
+    _notify();
   }
 
   /// swaps elemente on [index1] with [index2]
