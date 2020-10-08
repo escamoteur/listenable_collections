@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show ChangeNotifier, ValueListenable;
-import 'package:listenable_collections/src/manual_notifier.dart';
 
 /// A List that behaves like `ValueNotifier` if its data changes.
 /// it does not compare the elements on bulk operations
@@ -11,7 +10,7 @@ import 'package:listenable_collections/src/manual_notifier.dart';
 /// like `list[5]=4` if the content at index 4 is qual to 4 and only call
 /// `notifyListeners` if they are not equal.
 /// To allow atomic changes `ListNotifier` supports a single level of transactions
-class ListNotifier<T> extends DelegatingList<T>
+class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
     implements ValueListenable<List<T>> {
   ///
   /// Creates a new listenable List
@@ -32,10 +31,6 @@ class ListNotifier<T> extends DelegatingList<T>
   final bool _dontNotifyIfEqual;
   final bool Function(T x, T y) customEquality;
 
-  /// as we can't inherit from two classes whe have to implement
-  /// the `Listenable` interface. To not do that manually
-  /// we forward all needed functions to `_notifier`
-  final _notifier = ManualNotifier();
 
   /// if this is `true` no listener will be notified if the list changes.
   bool _inTransaction = false;
@@ -65,28 +60,16 @@ class ListNotifier<T> extends DelegatingList<T>
 
   void _notify() {
     if (!_inTransaction) {
-      _notifier.notifyListeners();
+      super.notifyListeners();
     }
   }
 
   /// If needed you can notifiy all listeners manually
-  void notifyListeners() => _notifier.notifyListeners();
+  void notifyListeners() => super.notifyListeners();
 
   /// returns an unmodifiable view on the lists data.
   @override
   List<T> get value => UnmodifiableListView<T>(this);
-
-  /// needed for the `ValueListenable` interface
-  @override
-  void addListener(void Function() listener) {
-    _notifier.addListener(listener);
-  }
-
-  /// needed for the `ValueListenable` interface
-  @override
-  void removeListener(void Function() listener) {
-    _notifier.removeListener(listener);
-  }
 
   /// from here all functions are equal to `List<T>` with the addition that all
   /// modifying functions will call `notifyListener` if not in a transaction.
