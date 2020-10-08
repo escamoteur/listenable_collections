@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 builder: (context, value, child) => Column(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.from(_list.map((value) => Text('List Item: $value'))),
+                  children: _list.map<Widget>((value) => Text('List Item: $value')).toList(),
                 ),
               )
             ],
