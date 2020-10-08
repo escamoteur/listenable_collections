@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart' show ChangeNotifier, ValueListenable;
 /// it does not compare the elements on bulk operations
 /// If you set [dontNotifyIfEqual] to `true` it will compare if a value passed value
 ///  passed is equal to the existing value.
-/// like `list[5]=4` if the content at index 4 is qual to 4 and only call
+/// like `list[5]=4` if the content at index 4 is equal to 4 and only call
 /// `notifyListeners` if they are not equal.
 /// To allow atomic changes `ListNotifier` supports a single level of transactions
 class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
@@ -17,7 +17,7 @@ class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
   /// [data] optional list that should be used as initial value
   /// if  [dontNotifyIfEqual]  is `true` `ListNotifier` will compare if a value
   ///  passed is equal to the existing value.
-  /// like `list[5]=4` if the content at index 4 is qual to 4 and only call
+  /// like `list[5]=4` if the content at index 4 is equal to 4 and only call
   /// `notifyListeners` if they are not equal. To prevent users from wondering
   /// why their UI doesn't update if they haven't overritten the equality operator
   /// the default is `false`.
