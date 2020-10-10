@@ -1,10 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:listenable_collections/listenable_collections.dart';
 
 void main() {
-  test('adds one to input values', () {
-    // expect(calculator.addOne(2), 3);
-    // expect(calculator.addOne(-7), -6);
-    // expect(calculator.addOne(0), 1);
-    // expect(() => calculator.addOne(null), throwsNoSuchMethodError);
+  ListNotifier list;
+
+  setUp(() {
+    list = ListNotifier(data: [1, 2, 3]);
+  });
+  test("Listeners get notified on swap", () async {
+    dynamic result;
+    list.addListener(() {
+      result = list.value;
+    });
+
+    list.swap(0, 2);
+
+    expect(result, [3, 2, 1]);
   });
 }
