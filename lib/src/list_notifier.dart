@@ -49,7 +49,7 @@ class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
     _notify();
   }
 
-  /// swaps elemente on [index1] with [index2]
+  /// swaps elements on [index1] with [index2]
   void swap(int index1, int index2) {
     startTransAction();
     final temp = this[index1];
