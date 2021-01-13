@@ -48,106 +48,69 @@ class MapNotifier<K, V> extends DelegatingMap<K, V> with ChangeNotifier
 
   @override
   void operator []=(K key, V value) {
-    startTransAction();
     super[key] = value;
-    endTransAction();
+    _notify();
   }
 
   @override
   void addAll(Map<K, V> other) {
-    startTransAction();
     super.addAll(other);
-    endTransAction();
+    _notify();
   }
 
   @override
   void addEntries(Iterable<MapEntry<K, V>> entries) {
-    startTransAction();
     super.addEntries(entries);
-    endTransAction();
+    _notify();
   }
 
   @override
   void clear() {
-    startTransAction();
     super.clear();
-    endTransAction();
+    _notify();
   }
-
-  @override
-  Map<K2, V2> cast<K2, V2>() => super.cast<K2, V2>();
-
-  @override
-  bool containsKey(Object key) => super.containsKey(key);
-
-  @override
-  bool containsValue(Object value) => super.containsValue(value);
-
-  @override
-  Iterable<MapEntry<K, V>> get entries => super.entries;
-
-  @override
-  void forEach(void Function(K, V) f) {
-    super.forEach(f);
-  }
-
-  @override
-  bool get isEmpty => super.isEmpty;
-
-  @override
-  bool get isNotEmpty => super.isNotEmpty;
-
-  @override
-  Iterable<K> get keys => super.keys;
-
-  @override
-  int get length => super.length;
-
-  @override
-  Map<K2, V2> map<K2, V2>(MapEntry<K2, V2> Function(K, V) transform) =>
-      super.map(transform);
 
   @override
   V putIfAbsent(K key, V Function() ifAbsent) {
-    startTransAction();
     V v = super.putIfAbsent(key, ifAbsent);
-    endTransAction();
+    _notify();
     return v;
   }
 
   @override
   V remove(Object key) {
-    startTransAction();
+    final initialLength = this.value.length;
     V v = super.remove(key);
-    endTransAction();
+
+    if(this.value.length != initialLength)
+      _notify();
+
     return v;
   }
 
   @override
   void removeWhere(bool Function(K, V) test) {
-    startTransAction();
+    final initialLength = this.value.length;
     super.removeWhere(test);
-    endTransAction();
+
+    /// only notify if an element was removed
+    if(this.value.length == initialLength)
+      _notify();
   }
   
   @override
   Iterable<V> get values => super.values;
 
   @override
-  String toString() => super.toString();
-
-  @override
   V update(K key, V Function(V) update, {V Function() ifAbsent}) {
-    startTransAction();
     V v = super.update(key, update, ifAbsent: ifAbsent);
-    endTransAction();
+    _notify();
     return v;
   }
 
   @override
   void updateAll(V Function(K, V) update) {
-    startTransAction();
     super.updateAll(update);
-    endTransAction();
+    _notify();
   }
 }
