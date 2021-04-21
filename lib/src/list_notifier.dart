@@ -10,7 +10,8 @@ import 'package:flutter/foundation.dart' show ChangeNotifier, ValueListenable;
 /// like `list[5]=4` if the content at index 4 is equal to 4 and only call
 /// `notifyListeners` if they are not equal.
 /// To allow atomic changes `ListNotifier` supports a single level of transactions
-class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
+class ListNotifier<T> extends DelegatingList<T>
+    with ChangeNotifier
     implements ValueListenable<List<T>> {
   ///
   /// Creates a new listenable List
@@ -23,14 +24,12 @@ class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
   /// the default is `true`.
   /// Alternatively you can pass in a [customEquality] function that is then used instead
   /// of `==`
-  ListNotifier(
-      {List<T> data, bool notifyIfEqual = true, this.customEquality})
+  ListNotifier({List<T>? data, bool notifyIfEqual = true, this.customEquality})
       : _notifyIfEqual = notifyIfEqual,
         super(data ?? []);
 
   final bool _notifyIfEqual;
-  final bool Function(T x, T y) customEquality;
-
+  final bool Function(T x, T y)? customEquality;
 
   /// if this is `true` no listener will be notified if the list changes.
   bool _inTransaction = false;
@@ -86,7 +85,7 @@ class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
   @override
   void operator []=(int index, T value) {
     final areEqual = customEquality != null
-        ? customEquality(super[index], value)
+        ? customEquality!(super[index], value)
         : super[index] == value;
     super[index] = value;
 
@@ -114,7 +113,7 @@ class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
   }
 
   @override
-  void fillRange(int start, int end, [T fillValue]) {
+  void fillRange(int start, int end, [T? fillValue]) {
     super.fillRange(start, end, fillValue);
     _notify();
   }
@@ -132,7 +131,7 @@ class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
   }
 
   @override
-  bool remove(Object value) {
+  bool remove(Object? value) {
     final val = super.remove(value);
     _notify();
     return val;
@@ -189,13 +188,13 @@ class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
   }
 
   @override
-  void shuffle([math.Random random]) {
+  void shuffle([math.Random? random]) {
     super.shuffle(random);
     _notify();
   }
 
   @override
-  void sort([int Function(T, T) compare]) {
+  void sort([int Function(T, T)? compare]) {
     super.sort(compare);
     _notify();
   }

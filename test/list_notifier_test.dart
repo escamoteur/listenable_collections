@@ -4,7 +4,7 @@ import '../lib/src/list_notifier.dart';
 
 void main() {
   group("Tests for the ListNotifier's methods", () {
-    ListNotifier list;
+    late ListNotifier list;
     List result = [];
 
     setUp(() {
@@ -167,7 +167,7 @@ void main() {
   });
 
   group("Tests for the ListNotifier's equality", () {
-    List result;
+    List? result;
 
     setUp(() {
       result = null;
