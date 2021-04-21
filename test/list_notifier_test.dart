@@ -176,7 +176,7 @@ void main() {
     test("The listener isn't notified if the value is equal", () {
       final ListNotifier list = ListNotifier(
         data: [1, 2, 3],
-        dontNotifyIfEqual: true,
+        notifyIfEqual: false,
       );
 
       list.addListener(() {
@@ -191,7 +191,7 @@ void main() {
     test("customEuqality works correctly", () {
       final ListNotifier list = ListNotifier(
         data: [1, 2, 3],
-        dontNotifyIfEqual: true,
+        notifyIfEqual: false,
         customEquality: (index, value) => value >= 3,
       );
 
