@@ -4,7 +4,7 @@ import '../lib/src/list_notifier.dart';
 
 void main() {
   group("Tests for the ListNotifier's methods", () {
-    ListNotifier list;
+    late ListNotifier list;
     List result = [];
 
     setUp(() {
@@ -167,7 +167,7 @@ void main() {
   });
 
   group("Tests for the ListNotifier's equality", () {
-    List result;
+    List? result;
 
     setUp(() {
       result = null;
@@ -176,7 +176,7 @@ void main() {
     test("The listener isn't notified if the value is equal", () {
       final ListNotifier list = ListNotifier(
         data: [1, 2, 3],
-        dontNotifyIfEqual: true,
+        notifyIfEqual: false,
       );
 
       list.addListener(() {
@@ -191,7 +191,7 @@ void main() {
     test("customEuqality works correctly", () {
       final ListNotifier list = ListNotifier(
         data: [1, 2, 3],
-        dontNotifyIfEqual: true,
+        notifyIfEqual: false,
         customEquality: (index, value) => value >= 3,
       );
 

@@ -5,32 +5,31 @@ import 'package:flutter/foundation.dart' show ChangeNotifier, ValueListenable;
 
 /// A List that behaves like `ValueNotifier` if its data changes.
 /// it does not compare the elements on bulk operations
-/// If you set [dontNotifyIfEqual] to `true` it will compare if a value passed value
+/// If you set [notifyIfEqual] to `false` it will compare if a value passed value
 ///  passed is equal to the existing value.
 /// like `list[5]=4` if the content at index 4 is equal to 4 and only call
 /// `notifyListeners` if they are not equal.
 /// To allow atomic changes `ListNotifier` supports a single level of transactions
-class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
+class ListNotifier<T> extends DelegatingList<T>
+    with ChangeNotifier
     implements ValueListenable<List<T>> {
   ///
   /// Creates a new listenable List
   /// [data] optional list that should be used as initial value
-  /// if  [dontNotifyIfEqual]  is `true` `ListNotifier` will compare if a value
+  /// if  [notifyIfEqual]  is `false` `ListNotifier` will compare if a value
   ///  passed is equal to the existing value.
   /// like `list[5]=4` if the content at index 4 is equal to 4 and only call
   /// `notifyListeners` if they are not equal. To prevent users from wondering
   /// why their UI doesn't update if they haven't overritten the equality operator
-  /// the default is `false`.
+  /// the default is `true`.
   /// Alternatively you can pass in a [customEquality] function that is then used instead
   /// of `==`
-  ListNotifier(
-      {List<T> data, bool dontNotifyIfEqual = false, this.customEquality})
-      : _dontNotifyIfEqual = dontNotifyIfEqual,
+  ListNotifier({List<T>? data, bool notifyIfEqual = true, this.customEquality})
+      : _notifyIfEqual = notifyIfEqual,
         super(data ?? []);
 
-  final bool _dontNotifyIfEqual;
-  final bool Function(T x, T y) customEquality;
-
+  final bool _notifyIfEqual;
+  final bool Function(T x, T y)? customEquality;
 
   /// if this is `true` no listener will be notified if the list changes.
   bool _inTransaction = false;
@@ -86,11 +85,11 @@ class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
   @override
   void operator []=(int index, T value) {
     final areEqual = customEquality != null
-        ? customEquality(super[index], value)
+        ? customEquality!(super[index], value)
         : super[index] == value;
     super[index] = value;
 
-    if ((!_dontNotifyIfEqual && customEquality == null) || !areEqual) {
+    if ((_notifyIfEqual && customEquality == null) || !areEqual) {
       _notify();
     }
   }
@@ -114,7 +113,7 @@ class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
   }
 
   @override
-  void fillRange(int start, int end, [T fillValue]) {
+  void fillRange(int start, int end, [T? fillValue]) {
     super.fillRange(start, end, fillValue);
     _notify();
   }
@@ -132,7 +131,7 @@ class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
   }
 
   @override
-  bool remove(Object value) {
+  bool remove(Object? value) {
     final val = super.remove(value);
     _notify();
     return val;
@@ -189,13 +188,13 @@ class ListNotifier<T> extends DelegatingList<T> with ChangeNotifier
   }
 
   @override
-  void shuffle([math.Random random]) {
+  void shuffle([math.Random? random]) {
     super.shuffle(random);
     _notify();
   }
 
   @override
-  void sort([int Function(T, T) compare]) {
+  void sort([int Function(T, T)? compare]) {
     super.sort(compare);
     _notify();
   }
