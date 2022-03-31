@@ -7,17 +7,21 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
   MapNotifier({
     Map<K, V>? data,
     bool notifyIfEqual = false,
+    this.customEquality,
   })  : _notifyIfEqual = notifyIfEqual,
         super(data ?? {});
 
   final bool _notifyIfEqual;
+  final bool Function(V? x, V? y)? customEquality;
 
   @override
   Map<K, V> get value => UnmodifiableMapView(this);
 
   @override
   operator []=(K key, V value) {
-    final areEqual = super[key] == value;
+    final areEqual = customEquality == null
+        ? super[key] == value
+        : customEquality!(super[key], value);
     super[key] = value;
 
     if (!areEqual || (areEqual && _notifyIfEqual)) {
@@ -30,8 +34,7 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
     final initialMapValue = {...this};
     super.addAll(other);
 
-    final notify = _shouldNotify(initialMapValue);
-    if (notify) {
+    if (_shouldNotify(initialMapValue)) {
       notifyListeners();
     }
   }
@@ -44,7 +47,9 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
     }
 
     for (final key in keys) {
-      if (this[key] != other[key]) {
+      final areValuesEqual = customEquality?.call(this[key], other[key]) ??
+          this[key] == other[key];
+      if (!areValuesEqual) {
         return false;
       }
     }

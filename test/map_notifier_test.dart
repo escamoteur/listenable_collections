@@ -252,4 +252,77 @@ void main() {
       });
     });
   });
+
+  group('Custom equality tests', () {
+    final customEquality = (int? x, int? y) => (x ?? 0) > 3 || (y ?? 0) > 3;
+
+    group('When notifyIfEqual is false', () {
+      late MapNotifier<String, int> mapNotifier;
+      late Map<String, int> result;
+
+      setUp(() {
+        mapNotifier = MapNotifier(customEquality: customEquality);
+        result = {};
+        mapNotifier.addListener(() {
+          result = {...mapNotifier};
+        });
+      });
+
+      tearDown(() {
+        mapNotifier.dispose();
+      });
+
+      test(
+        'Listener is not notified if customEquality returns true (are equal)',
+        () {
+          mapNotifier['five'] = 5;
+          expect(result, isEmpty);
+        },
+      );
+
+      test(
+        'Listener is notified if customEquality returns false (are not equal)',
+        () {
+          mapNotifier['one'] = 1;
+          expect(result['one'], 1);
+        },
+      );
+    });
+
+    group('When notifyIfEqual is true', () {
+      late MapNotifier<String, int> mapNotifier;
+      late Map<String, int> result;
+
+      setUp(() {
+        mapNotifier = MapNotifier(
+          customEquality: customEquality,
+          notifyIfEqual: true,
+        );
+        result = {};
+        mapNotifier.addListener(() {
+          result = {...mapNotifier};
+        });
+      });
+
+      tearDown(() {
+        mapNotifier.dispose();
+      });
+
+      test(
+        'Listener is notified if customEquality returns true (are equal)',
+        () {
+          mapNotifier['five'] = 5;
+          expect(result['five'], 5);
+        },
+      );
+
+      test(
+        'Listener is notified if customEquality returns false (are not equal)',
+        () {
+          mapNotifier['one'] = 1;
+          expect(result['one'], 1);
+        },
+      );
+    });
+  });
 }
