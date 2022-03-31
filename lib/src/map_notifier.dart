@@ -58,7 +58,11 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
   }
 
   bool _shouldNotify(Map<K, V> other) {
-    return !_areEqual(other) || (_areEqual(other) && _notifyIfEqual);
+    if (_notifyIfEqual) {
+      return true;
+    }
+
+    return !_areEqual(other);
   }
 
   @override
