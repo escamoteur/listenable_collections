@@ -71,9 +71,7 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
     final initialMapValue = {...this};
     super.addAll(other);
 
-    if (_shouldNotify(initialMapValue)) {
-      notifyListeners();
-    }
+    _notifyIfNeeded(initialMapValue);
   }
 
   /// A method to compare between two maps, this Map Notifier and any other
@@ -94,6 +92,12 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
     return true;
   }
 
+  void _notifyIfNeeded(Map<K, V> other) {
+    if (_shouldNotify(other)) {
+      notifyListeners();
+    }
+  }
+
   bool _shouldNotify(Map<K, V> other) {
     if (_notifyIfEqual) {
       return true;
@@ -107,9 +111,7 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
     final initialMapValue = {...this};
     super.addEntries(entries);
 
-    if (_shouldNotify(initialMapValue)) {
-      notifyListeners();
-    }
+    _notifyIfNeeded(initialMapValue);
   }
 
   @override
@@ -127,9 +129,7 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
     final initialMapValue = {...this};
     final value = super.putIfAbsent(key, ifAbsent);
 
-    if (_shouldNotify(initialMapValue)) {
-      notifyListeners();
-    }
+    _notifyIfNeeded(initialMapValue);
     return value;
   }
 
@@ -138,9 +138,7 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
     final initialMapValue = {...this};
     final value = super.remove(key);
 
-    if (_shouldNotify(initialMapValue)) {
-      notifyListeners();
-    }
+    _notifyIfNeeded(initialMapValue);
 
     return value;
   }
@@ -151,9 +149,7 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
 
     super.removeWhere(test);
 
-    if (_shouldNotify(initialMapValue)) {
-      notifyListeners();
-    }
+    _notifyIfNeeded(initialMapValue);
   }
 
   @override
@@ -161,9 +157,7 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
     final initialMapValue = {...this};
     final value = super.update(key, update, ifAbsent: ifAbsent);
 
-    if (_shouldNotify(initialMapValue)) {
-      notifyListeners();
-    }
+    _notifyIfNeeded(initialMapValue);
 
     return value;
   }
@@ -174,8 +168,6 @@ class MapNotifier<K, V> extends DelegatingMap<K, V>
 
     super.updateAll(update);
 
-    if (_shouldNotify(initialMapValue)) {
-      notifyListeners();
-    }
+    _notifyIfNeeded(initialMapValue);
   }
 }
