@@ -4,27 +4,54 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show ChangeNotifier, ValueListenable;
 import 'package:functional_listener/functional_listener.dart';
 
-/// A List that behaves like `ValueNotifier` if its data changes.
-/// it does not compare the elements on bulk operations
-/// If you set [notifyIfEqual] to `false` it will compare if a value passed value
-///  passed is equal to the existing value.
-/// like `list[5]=4` if the content at index 4 is equal to 4 and only call
-/// `notifyListeners` if they are not equal.
-/// To allow atomic changes `ListNotifier` supports a single level of transactions
+/// `ListNotifier` is a List that behaves similarly to `ValueNotifier` when its
+/// data changes.
+/// It does not compare the elements during bulk operations.
+///
+/// If [notificationMode] is set to `normal`, `ListNotifier` will compare the new
+/// value with the existing value.
+///
+/// For example, in the case of `list[5]=4`, `ListNotifier` checks if the content
+/// at index 5 is equal to 4.
+/// It will only call `notifyListeners` if the values are not equal, thus
+/// avoiding unnecessary notifications.
+///
+/// If [notificationMode] is set to `always` which is the default, `ListNotifier`
+/// will always notify listeners when the list changes.
+/// For example, in the case of `list[5]=4`, `ListNotifier` will always notify
+/// listeners, regardless of the values being equal.
+///
+/// If [notificationMode] is set to `manual`, `ListNotifier` will not notify
+/// listeners when the list changes.
+/// For example, in the case of `list[5]=4`, `ListNotifier` will not notify
+/// listeners.
+/// You can manually notify listeners by calling `notifyListeners`.
+///
+/// `ListNotifier` supports a single level of transactions to allow atomic
+/// changes. This means you can make multiple changes to the list and have them
+/// all be treated as a single operation, which can be useful for performance
+/// reasons.
+///
+/// There are certain functions that will always notify listeners without
+/// comparing the existing value unless [notificationMode] is set to [manual].
+/// These functions include:
+/// - [setAll] Replaces multiple elements in the list with new values.
+/// - [setRange] Replaces a range of elements in the list with new values.
+/// - [shuffle] Randomly rearranges the elements of the list.
+/// - [sort] Sorts the elements of the list in order.
 class ListNotifier<T> extends DelegatingList<T>
     with ChangeNotifier
     implements ValueListenable<List<T>> {
-  ///
   /// Creates a new listenable List
   /// [data] optional list that should be used as initial value
   /// if  [notifierMode]  is [normal] `ListNotifier` will compare if a value
-  ///  passed is equal to the existing value.
-  /// like `list[5]=4` if the content at index 4 is equal to 4 and only call
+  /// passed is equal to the existing value.
+  /// Like `list[5]=4` if the content at index 4 is equal to 4 and only call
   /// `notifyListeners` if they are not equal. To prevent users from wondering
-  /// why their UI doesn't update if they haven't overritten the equality operator
-  /// the default is [always].
-  /// [customEquality] can be used to set your own criteria for comparing when choosing
-  /// [normal] as [notifierMode].
+  /// why their UI doesn't update if they haven't overridden the equality
+  /// operator the default is [always].
+  /// [customEquality] can be used to set your own criteria for comparing when
+  /// choosing [normal] as [notifierMode].
   ListNotifier({
     List<T>? data,
     CustomNotifierMode notificationMode = CustomNotifierMode.always,
@@ -46,14 +73,17 @@ class ListNotifier<T> extends DelegatingList<T>
     _inTransaction = true;
   }
 
-  /// Ends a transaction
+  /// Ends a transaction and notifies all listeners if [notify] is `true`.
   void endTransAction({bool notify = true}) {
     assert(_inTransaction, 'No active transaction in ListNotifier');
     _inTransaction = false;
-    _notify(endofTransaction: true);
+    _notify(endOfTransaction: true);
   }
 
-  /// swaps elements on [index1] with [index2]
+  /// swaps elements on [index1] with [index2] and notifies listeners if the
+  /// values are different.
+  /// If [customEquality] is set it will be used to compare the values.
+  /// If [customEquality] is NOT set the `==` operator will be used.
   void swap(int index1, int index2) {
     final temp1 = this[index1];
     final temp2 = this[index2];
@@ -67,8 +97,8 @@ class ListNotifier<T> extends DelegatingList<T>
     _notify();
   }
 
-  void _notify({bool endofTransaction = false}) {
-    if (_inTransaction && !endofTransaction) {
+  void _notify({bool endOfTransaction = false}) {
+    if (_inTransaction && !endOfTransaction) {
       return;
     }
     switch (_notificationMode) {
@@ -86,7 +116,8 @@ class ListNotifier<T> extends DelegatingList<T>
     _hasChanged = false;
   }
 
-  /// If needed you can notifiy all listeners manually
+  /// If needed you can notify all listeners manually
+  @override
   void notifyListeners() => super.notifyListeners();
 
   /// returns an unmodifiable view on the lists data.
@@ -216,7 +247,7 @@ class ListNotifier<T> extends DelegatingList<T>
   void replaceRange(int start, int end, Iterable<T> iterable) {
     if (_notificationMode == CustomNotifierMode.normal) {
       /// we only need to check if the value is equal if we are in normal mode
-      _hasChanged = IterableEquality().equals(sublist(start, end), iterable);
+      _hasChanged = IterableEquality<T>().equals(sublist(start, end), iterable);
     }
     super.replaceRange(start, end, iterable);
     _notify();
@@ -238,7 +269,8 @@ class ListNotifier<T> extends DelegatingList<T>
   void setAll(int index, Iterable<T> iterable) {
     super.setAll(index, iterable);
 
-    /// This function will always notify listeners unless [notificationMode] is set to [manual]
+    /// This function will always notify listeners unless [notificationMode] is
+    /// set to [manual]
     _hasChanged = true;
     _notify();
   }
@@ -247,7 +279,8 @@ class ListNotifier<T> extends DelegatingList<T>
   void setRange(int start, int end, Iterable<T> iterable, [int skipCount = 0]) {
     super.setRange(start, end, iterable, skipCount);
 
-    /// This function will always notify listeners unless [notificationMode] is set to [manual]
+    /// This function will always notify listeners unless [notificationMode] is
+    /// set to [manual]
     _hasChanged = true;
     _notify();
   }
@@ -256,7 +289,8 @@ class ListNotifier<T> extends DelegatingList<T>
   void shuffle([math.Random? random]) {
     super.shuffle(random);
 
-    /// This function will always notify listeners unless [notificationMode] is set to [manual]
+    /// This function will always notify listeners unless [notificationMode] is
+    /// set to [manual]
     _hasChanged = true;
     _notify();
   }
@@ -265,7 +299,8 @@ class ListNotifier<T> extends DelegatingList<T>
   void sort([int Function(T, T)? compare]) {
     super.sort(compare);
 
-    /// This function will always notify listeners unless [notificationMode] is set to [manual]
+    /// This function will always notify listeners unless [notificationMode] is
+    /// set to [manual]
     _hasChanged = true;
     _notify();
   }
